@@ -26,19 +26,23 @@ export default function Payment() {
   const [errors,           setErrors          ] = useState({});
 
   useEffect(() => {
-    Promise.all([
-      getBookings(currentUser?.Customer_Id),
-      getPayments(),
-    ]).then(([bookRes, payRes]) => {
-      const allBookings = bookRes.data;
-      const allPayments = payRes.data;
-      const paid        = new Set(allPayments.map(p => String(p.Booking_Id)));
-      const pending     = allBookings.filter(b => b.Booking_Status === "Pending" && !paid.has(String(b.Booking_Id)));
-      const myIds       = new Set(allBookings.map(b => String(b.Booking_Id)));
-      const myPayments  = allPayments.filter(p => myIds.has(String(p.Booking_Id)));
+  getBookings(currentUser?.Customer_Id)
+    .then(async (bookRes) => {
+      const allBookings = bookRes.data.data;
+      const bookingIds  = allBookings.map(b => b.Booking_Id);
+
+      const payRes     = await getPayments(bookingIds);
+      const allPayments = payRes.data.data;
+
+      const paid    = new Set(allPayments.map(p => String(p.Booking_Id)));
+      const pending = allBookings.filter(b => b.Booking_Status === "Pending" && !paid.has(String(b.Booking_Id)));
+      const myIds   = new Set(allBookings.map(b => String(b.Booking_Id)));
+      const myPayments = allPayments.filter(p => myIds.has(String(p.Booking_Id)));
+
       setPendingBookings(pending);
       setPaymentHistory(myPayments);
-    }).finally(() => setLoadingData(false));
+    })
+    .finally(() => setLoadingData(false));
   }, [currentUser]);
 
   const selectedBooking = pendingBookings.find(b => String(b.Booking_Id) === String(selectedBookingId));

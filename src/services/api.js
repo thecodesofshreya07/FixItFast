@@ -1,42 +1,32 @@
-// ─── API SERVICE LAYER ───────────────────────────────────────────────────────
-// Dummy implementation with localStorage persistence so data survives page reloads.
-// When the real backend is ready, replace each function body with an axios call.
-//
-// import axios from "axios";
-// const API = axios.create({ baseURL: "http://localhost:5000" });
+// ─── src/services/api.js ─────────────────────────────────────────────────────
+// All HTTP calls to the Express backend go through this file.
+// Base URL reads from the Vite env variable VITE_API_URL.
+// If not set, it falls back to http://localhost:5000
 
-// ── STORAGE HELPERS ───────────────────────────────────────────────────────────
-// All data lives in localStorage under these keys so nothing is lost on reload.
-const KEYS = {
-  customers: "fif_customers",
-  nextId:    "fif_next_customer_id",
-  bookings:  "fif_bookings",
-  payments:  "fif_payments",
-};
+import axios from "axios";
 
-const load  = (key, fallback) => {
-  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : fallback; }
-  catch { return fallback; }
-};
-const save  = (key, value) => { try { localStorage.setItem(key, JSON.stringify(value)); } catch {} };
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  headers: { "Content-Type": "application/json" },
+});
 
-// ── LIVE DATA (initialised from localStorage) ─────────────────────────────────
-// These are module-level references so all API functions share the same state.
-// On every mutating operation we write back to localStorage immediately.
+// ── Global error normaliser ───────────────────────────────────────────────────
+// Converts axios error responses into plain JS Error objects so every
+// calling page can just catch(err) and use err.message.
+API.interceptors.response.use(
+  res => res,
+  err => {
+    const message =
+      err.response?.data?.error ||
+      err.message ||
+      "Something went wrong. Please try again.";
+    return Promise.reject(new Error(message));
+  }
+);
 
-const getCustomers    = ()  => load(KEYS.customers, []);
-const saveCustomers   = (v) => save(KEYS.customers, v);
-
-const getNextId       = ()  => load(KEYS.nextId, 1);
-const saveNextId      = (v) => save(KEYS.nextId, v);
-
-const _getBookings    = ()  => load(KEYS.bookings, []);
-const _saveBookings   = (v) => save(KEYS.bookings, v);
-
-const _getPayments    = ()  => load(KEYS.payments, []);
-const _savePayments   = (v) => save(KEYS.payments, v);
-
-// ── STATIC DATA ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATIC DATA  (enrichment — not stored in DB)
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export const PROFESSIONALS = [
   { Professional_Id: 101, Professional_name: "Amit",   Skill: "Plumbing",               Contact: "9001122334", Rating: 4.8 },
@@ -64,128 +54,76 @@ export const SERVICES = [
   { Service_Id: 210, Service_type: "Home Sanitization",      Service_charge: 1100, icon: "🧴", Professional_Id: 110, description: "Full home disinfection & sanitization spray" },
 ];
 
-// ── ASYNC DELAY SIMULATOR ─────────────────────────────────────────────────────
-const delay = (ms = 250) => new Promise(res => setTimeout(res, ms));
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/**
- * Register a new customer.
- * Backend equivalent → POST /register
- */
-export const register = async ({ Customer_name, Address, Contact, Password }) => {
-  await delay(500);
-  const customers = getCustomers();
-  if (customers.find(c => c.Contact === Contact))
-    throw new Error("An account with this contact number already exists.");
+/** POST /register — creates a new Customer row in the DB */
+export const register = (payload) =>
+  API.post("/register", payload);
 
-  const id = getNextId();
-  const newCustomer = { Customer_Id: id, Customer_name, Address, Contact, Password };
-  saveCustomers([...customers, newCustomer]);
-  saveNextId(id + 1);
-
-  const { Password: _, ...safe } = newCustomer;
-  return { data: safe };
-};
-
-/**
- * Login.
- * Backend equivalent → POST /login
- */
-export const loginCustomer = async ({ Contact, Password }) => {
-  await delay(500);
-  const customer = getCustomers().find(
-    c => c.Contact === Contact && c.Password === Password
-  );
-  if (!customer) throw new Error("Invalid contact number or password.");
-  const { Password: _, ...safe } = customer;
-  return { data: safe };
-};
+/** POST /login — validates Contact + Password, returns customer data */
+export const loginCustomer = (payload) =>
+  API.post("/login", payload);
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERVICES & PROFESSIONALS
 // ═══════════════════════════════════════════════════════════════════════════════
 
-/** Backend equivalent → GET /getServices */
-export const getServices = async () => {
-  await delay();
-  return { data: SERVICES };
-};
+/** GET /getServices — fetches all services from DB (enriched with icon/desc) */
+export const getServices = () =>
+  API.get("/getServices");
 
-/** Backend equivalent → GET /getProfessionals */
-export const getProfessionals = async () => {
-  await delay();
-  return { data: PROFESSIONALS };
-};
+/** GET /getProfessionals — fetches all professionals from DB */
+export const getProfessionals = () =>
+  API.get("/getProfessionals");
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // BOOKINGS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Get bookings for a customer (or all if no customerId).
- * Backend equivalent → GET /getBookings?customerId=X
+ * GET /getBookings?customerId=X
+ * Returns all bookings for the logged-in customer.
  */
-export const getBookings = async (customerId) => {
-  await delay();
-  const all = _getBookings();
-  const filtered = customerId
-    ? all.filter(b => b.Customer_Id === customerId)
-    : all;
-  return { data: filtered };
-};
+export const getBookings = (customerId) =>
+  API.get("/getBookings", { params: { customerId } });
 
 /**
- * Add a new booking.
- * Backend equivalent → POST /addBooking
+ * POST /addBooking
+ * Body: { Booking_Id, Customer_Id, Professional_Id, Service_Id, Booking_date, Booking_Status }
+ * Inserts into Booking + Booking_Service in a single DB transaction.
  */
-export const addBooking = async (booking) => {
-  await delay(500);
-  const updated = [..._getBookings(), booking];
-  _saveBookings(updated);
-  return { data: booking };
-};
+export const addBooking = (booking) =>
+  API.post("/addBooking", booking);
 
 /**
- * Update booking status to "Completed" after payment.
- * In real backend → PUT /updateBooking/:id  or  PATCH /bookings/:id/status
- * This is a FRONTEND responsibility here since there is no backend yet.
+ * PATCH /updateBookingStatus/:id
+ * Marks a booking as Completed.
+ * Called automatically by addPayment — frontend doesn't need to call this directly.
  */
-export const markBookingCompleted = async (bookingId) => {
-  await delay(200);
-  const updated = _getBookings().map(b =>
-    b.Booking_Id === bookingId
-      ? { ...b, Booking_Status: "Completed" }
-      : b
-  );
-  _saveBookings(updated);
-  return { data: { Booking_Id: bookingId, Booking_Status: "Completed" } };
-};
+export const markBookingCompleted = (bookingId) =>
+  API.patch(`/updateBookingStatus/${bookingId}`, { status: "Completed" });
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // PAYMENTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
 /**
- * Add payment AND mark the linked booking as Completed.
- * Backend equivalent → POST /addPayment  (backend should handle status update too)
+ * POST /addPayment
+ * Body: { Payment_Id, Booking_Id, Amount, Payment_mode, Payment_date }
+ * The backend inserts the payment AND updates Booking_Status to Completed
+ * in one atomic transaction — no separate markBookingCompleted call needed.
  */
-export const addPayment = async (payment) => {
-  await delay(500);
-  const updated = [..._getPayments(), payment];
-  _savePayments(updated);
-  // Always mark the booking completed when payment is recorded
-  await markBookingCompleted(payment.Booking_Id);
-  return { data: payment };
-};
+export const addPayment = (payment) =>
+  API.post("/addPayment", payment);
 
 /**
- * Get all payments.
- * Backend equivalent → GET /getPayments
+ * GET /getPayments?bookingIds=301,302,303
+ * Returns payments for the provided booking IDs (the customer's own bookings).
+ * @param {number[]} bookingIds - array of Booking_Id values
  */
-export const getPayments = async () => {
-  await delay();
-  return { data: _getPayments() };
+export const getPayments = (bookingIds = []) => {
+  if (bookingIds.length === 0) return Promise.resolve({ data: { data: [] } });
+  return API.get("/getPayments", { params: { bookingIds: bookingIds.join(",") } });
 };

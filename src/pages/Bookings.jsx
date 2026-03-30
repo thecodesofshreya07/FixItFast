@@ -14,7 +14,7 @@ export default function Bookings() {
 
   useEffect(() => {
     getBookings(currentUser?.Customer_Id)
-      .then(res => setBookings(res.data))
+      .then(res => setBookings(res.data.data))
       .finally(() => setLoading(false));
   }, [currentUser]);
 

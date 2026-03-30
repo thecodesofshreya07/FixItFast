@@ -37,7 +37,7 @@ export default function Signup() {
     try {
       const { confirmPassword: _, ...payload } = form;
       const res = await register(payload);
-      login(res.data);
+      login(res.data.data);
       navigate("/services");
     } catch (err) {
       show(err.message, "error");

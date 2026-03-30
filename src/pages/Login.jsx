@@ -32,7 +32,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await loginCustomer(form);
-      login(res.data);
+      login(res.data.data);
       navigate(from, { replace: true });
     } catch (err) {
       show(err.message, "error");

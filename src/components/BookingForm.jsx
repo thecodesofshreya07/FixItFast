@@ -1,61 +1,58 @@
 import { useState, useEffect } from "react";
-import { addBooking } from "../services/api";
+import { addBooking, SERVICES } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 export default function BookingForm({ selectedService }) {
+  const { customer } = useAuth(); // ← get logged-in customer
+
   const [form, setForm] = useState({
-    Booking_Id: Math.floor(Math.random() * 1000),
-    Customer_Id: "",
+    Booking_Id:      Math.floor(Math.random() * 90000) + 10000,
+    Customer_Id:     "",
     Professional_Id: "",
-    Booking_date: ""
+    Service_Id:      "",
+    Booking_date:    "",
+    Booking_Status:  "Pending",
   });
+
+  // Auto-fill Customer_Id and service details when component loads
+  useEffect(() => {
+    if (customer) {
+      setForm(prev => ({ ...prev, Customer_Id: customer.Customer_Id }));
+    }
+  }, [customer]);
 
   useEffect(() => {
     if (selectedService) {
       setForm(prev => ({
         ...prev,
-        Professional_Id: selectedService.professional
+        Professional_Id: selectedService.Professional_Id,
+        Service_Id:      selectedService.Service_Id,
       }));
     }
   }, [selectedService]);
 
-  const handleChange = e =>
-    setForm({ ...form, [e.target.name]: e.target.value });
-
   const handleSubmit = e => {
     e.preventDefault();
-    addBooking(form).then(() => alert("Booking Successful"));
+    addBooking(form).then(() => alert("Booking Successful!"));
   };
 
   return (
     <form onSubmit={handleSubmit}>
-
       <input value={form.Booking_Id} disabled />
+      
+      {/* Show customer name instead of asking for ID */}
+      <input value={customer?.Customer_name || ""} disabled placeholder="Customer" />
 
-      <input
-        name="Customer_Id"
-        placeholder="Enter Customer ID (1-10)"
-        onChange={handleChange}
-      />
-
-      <input
-        value={selectedService?.name || ""}
-        disabled
-        placeholder="Service"
-      />
-
-      <input
-        value={form.Professional_Id}
-        disabled
-        placeholder="Assigned Professional"
-      />
+      <input value={selectedService?.Service_type || ""} disabled placeholder="Service" />
+      <input value={selectedService?.Professional_Id || ""} disabled placeholder="Professional" />
 
       <input
         type="date"
         name="Booking_date"
-        onChange={handleChange}
+        onChange={e => setForm({ ...form, Booking_date: e.target.value })}
       />
 
-      <button>Confirm Booking</button>
+      <button type="submit">Confirm Booking</button>
     </form>
   );
 }
