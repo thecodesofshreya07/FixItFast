@@ -92,7 +92,7 @@ export default function Signup() {
 
             <div className="form-group">
               <label className="form-label">Full Name</label>
-              <input className="form-input" placeholder="e.g. Shreya Sharma" value={form.Customer_name} onChange={set("Customer_name")} />
+              <input className="form-input" placeholder="e.g. Harry Messi" value={form.Customer_name} onChange={set("Customer_name")} />
               {errors.Customer_name && <span style={s.error}>{errors.Customer_name}</span>}
             </div>
 
