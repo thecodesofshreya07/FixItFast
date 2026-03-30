@@ -98,7 +98,7 @@ export default function Signup() {
 
             <div className="form-group">
               <label className="form-label">Address</label>
-              <input className="form-input" placeholder="e.g. Badlapur, Maharashtra" value={form.Address} onChange={set("Address")} />
+              <input className="form-input" placeholder="e.g. Thane, Maharashtra" value={form.Address} onChange={set("Address")} />
               {errors.Address && <span style={s.error}>{errors.Address}</span>}
             </div>
 
