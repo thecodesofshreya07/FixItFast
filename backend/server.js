@@ -54,6 +54,9 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: "Internal server error." });
 });
 
+const connectDB = require("./config/db");
+connectDB();
+
 // ── Start server ──────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`🚀  FixItFast backend running at http://localhost:${PORT}`);

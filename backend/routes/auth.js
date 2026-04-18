@@ -1,98 +1,99 @@
-// ─── routes/auth.js ───────────────────────────────────────────────────────────
-// POST /register  → INSERT into Customer
-// POST /login     → SELECT from Customer, verify bcrypt password
-
 const express = require("express");
 const bcrypt  = require("bcryptjs");
-const pool    = require("../db");
+const Customer = require("../models/Customer");
 
 const router = express.Router();
 
-// ── POST /register ────────────────────────────────────────────────────────────
-// Body: { Customer_name, Address, Contact, Password }
-// Returns the new customer row (without Password)
-router.post("/register", async (req, res) => {
-  const { Customer_name, Address, Contact, Password } = req.body;
 
-  // Basic validation
-  if (!Customer_name || !Address || !Contact || !Password) {
+// ── POST /register ─────────────────────────────────────────
+router.post("/register", async (req, res) => {
+  const { Customer_name, Address, contact, Contact, Password } = req.body;
+
+  const finalContact = contact || Contact;
+
+  // Validation
+  if (!Customer_name || !Address || !finalContact || !Password) {
     return res.status(400).json({ error: "All fields are required." });
   }
-  if (!/^\d{10}$/.test(Contact)) {
+
+  if (!/^\d{10}$/.test(finalContact)) {
     return res.status(400).json({ error: "Enter a valid 10-digit contact number." });
   }
+
   if (Password.length < 6) {
     return res.status(400).json({ error: "Password must be at least 6 characters." });
   }
 
   try {
-    // Check for duplicate contact number
-    const [existing] = await pool.query(
-      "SELECT Customer_Id FROM Customer WHERE contact = ?",
-      [Contact]
-    );
-    if (existing.length > 0) {
-      return res.status(409).json({ error: "An account with this contact number already exists." });
+    // Check if user already exists
+    const existing = await Customer.findOne({ contact: finalContact });
+
+    if (existing) {
+      return res.status(409).json({
+        error: "An account with this contact number already exists."
+      });
     }
 
-    // Hash the password before storing
+    // Hash password
     const hashedPassword = await bcrypt.hash(Password, 10);
 
-    // Insert new customer — let MySQL AUTO_INCREMENT handle the ID
-    const [result] = await pool.query(
-      "INSERT INTO Customer (Customer_name, Address, contact, Password) VALUES (?, ?, ?, ?)",
-      [Customer_name, Address, Contact, hashedPassword]
-    );
+    // Create user (✅ FIXED — includes contact)
+    const newCustomer = new Customer({
+      Customer_Id: Date.now(),
+      Customer_name,
+      Address,
+      contact: finalContact,   // 🔥 IMPORTANT FIX
+      Password: hashedPassword
+    });
 
-    const newCustomerId = result.insertId;
+    await newCustomer.save();
 
     return res.status(201).json({
       data: {
-        Customer_Id:   newCustomerId,
+        Customer_Id: newCustomer.Customer_Id,
         Customer_name,
         Address,
-        Contact,
-      },
+        contact: finalContact
+      }
     });
+
   } catch (err) {
-    console.error("POST /register error:", err);
+    console.error("REGISTER ERROR:", err);
     return res.status(500).json({ error: "Server error. Please try again." });
   }
 });
 
-// ── POST /login ───────────────────────────────────────────────────────────────
-// Body: { Contact, Password }
-// Returns the customer row (without Password) on success
-router.post("/login", async (req, res) => {
-  const { Contact, Password } = req.body;
 
-  if (!Contact || !Password) {
+// ── POST /login ─────────────────────────────────────────
+router.post("/login", async (req, res) => {
+  const { contact, Contact, Password } = req.body;
+
+  const finalContact = contact || Contact;
+
+  if (!finalContact || !Password) {
     return res.status(400).json({ error: "Contact and password are required." });
   }
 
   try {
-    const [rows] = await pool.query(
-      "SELECT * FROM Customer WHERE contact = ?",
-      [Contact]
-    );
+    const customer = await Customer.findOne({ contact: finalContact });
 
-    if (rows.length === 0) {
-      return res.status(401).json({ error: "Invalid contact number or password." });
+    if (!customer) {
+      return res.status(401).json({ error: "Invalid contact or password." });
     }
 
-    const customer = rows[0];
-
-    // Compare submitted password against stored bcrypt hash
     const match = await bcrypt.compare(Password, customer.Password);
+
     if (!match) {
-      return res.status(401).json({ error: "Invalid contact number or password." });
+      return res.status(401).json({ error: "Invalid contact or password." });
     }
 
-    // Return safe customer object (never send the password hash back)
-    const { Password: _, ...safe } = customer;
+    // Remove password before sending
+    const { Password: _, ...safe } = customer.toObject();
+
     return res.json({ data: safe });
+
   } catch (err) {
-    console.error("POST /login error:", err);
+    console.error("LOGIN ERROR:", err);
     return res.status(500).json({ error: "Server error. Please try again." });
   }
 });
