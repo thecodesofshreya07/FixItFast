@@ -9,6 +9,7 @@ import Bookings from "./pages/Bookings";
 import Payment from "./pages/Payment";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import ForgotPassword from "./pages/ForgotPassword";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function AppRoutes() {
           <Route path="/services" element={<Services />} />
           <Route path="/login"   element={<Login />}    />
           <Route path="/signup"  element={<Signup />}   />
-
+          <Route path="/forgot-password" element={<ForgotPassword />} />
           {/* Protected routes — redirect to /login if not logged in */}
           <Route path="/book" element={
             <ProtectedRoute><Book /></ProtectedRoute>

@@ -6,12 +6,12 @@ export default function BookingForm({ selectedService }) {
   const { customer } = useAuth(); // ← get logged-in customer
 
   const [form, setForm] = useState({
-    Booking_Id:      Math.floor(Math.random() * 90000) + 10000,
-    Customer_Id:     "",
+    Booking_Id: Math.floor(Math.random() * 90000) + 10000,
+    Customer_Id: "",
     Professional_Id: "",
-    Service_Id:      "",
-    Booking_date:    "",
-    Booking_Status:  "Pending",
+    Service_Id: "",
+    Booking_date: "",
+    Booking_Status: "Pending",
   });
 
   // Auto-fill Customer_Id and service details when component loads
@@ -26,20 +26,23 @@ export default function BookingForm({ selectedService }) {
       setForm(prev => ({
         ...prev,
         Professional_Id: selectedService.Professional_Id,
-        Service_Id:      selectedService.Service_Id,
+        Service_Id: selectedService.Service_Id,
       }));
     }
   }, [selectedService]);
 
   const handleSubmit = e => {
     e.preventDefault();
-    addBooking(form).then(() => alert("Booking Successful!"));
+    addBooking(form).then(() => show({
+      type: "success",
+      message: "Booking Successfull"
+    }));
   };
 
   return (
     <form onSubmit={handleSubmit}>
       <input value={form.Booking_Id} disabled />
-      
+
       {/* Show customer name instead of asking for ID */}
       <input value={customer?.Customer_name || ""} disabled placeholder="Customer" />
 

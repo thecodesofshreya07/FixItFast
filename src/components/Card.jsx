@@ -30,7 +30,21 @@ export function Toast({ message, type = "success", onClose }) {
 // ── useToast hook ─────────────────────────────────────
 export function useToast() {
   const [toast, setToast] = useState(null);
-  const show = (message, type = "success") => setToast({ message, type });
+  const show = (arg, type = "success") => {
+    // Case 1: object style
+    if (arg && typeof arg === "object") {
+      setToast({
+        message: arg.message || "Something happened",
+        type: arg.type || "success",
+      });
+      return;
+    }
+    // Case 2: string style
+    setToast({
+      message: arg,
+      type,
+    });
+  };
   const hide = () => setToast(null);
   return { toast, show, hide };
 }

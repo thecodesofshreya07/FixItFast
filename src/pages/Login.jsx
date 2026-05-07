@@ -5,21 +5,21 @@ import { useAuth } from "../context/AuthContext";
 import { Toast, useToast } from "../components/Card";
 
 export default function Login() {
-  const navigate        = useNavigate();
-  const location        = useLocation();
-  const { login }       = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const { toast, show, hide } = useToast();
 
   const from = location.state?.from?.pathname || "/";
 
-  const [form,     setForm    ] = useState({ Contact: "", Password: "" });
-  const [errors,   setErrors  ] = useState({});
-  const [loading,  setLoading ] = useState(false);
+  const [form, setForm] = useState({ Email: "", Password: "" });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [showPass, setShowPass] = useState(false);
 
   const validate = () => {
     const e = {};
-    if (!form.Contact.trim())  e.Contact  = "Contact number is required";
+    if (!form.Email.trim()) e.Email = "Email is required";
     if (!form.Password.trim()) e.Password = "Password is required";
     return e;
   };
@@ -79,15 +79,16 @@ export default function Login() {
           <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
 
             <div className="form-group">
-              <label className="form-label">Contact Number</label>
-              <input
-                className="form-input"
-                placeholder="Enter your registered contact number"
-                value={form.Contact}
-                onChange={e => setForm({ ...form, Contact: e.target.value })}
-              />
-              {errors.Contact && <span style={s.error}>{errors.Contact}</span>}
-            </div>
+  <label className="form-label">Email</label>
+  <input
+    className="form-input"
+    type="email"
+    placeholder="Enter your registered email"
+    value={form.Email}
+    onChange={e => setForm({ ...form, Email: e.target.value })}
+  />
+  {errors.Email && <span style={s.error}>{errors.Email}</span>}
+</div>
 
             <div className="form-group">
               <label className="form-label">Password</label>
@@ -105,6 +106,19 @@ export default function Login() {
                 </button>
               </div>
               {errors.Password && <span style={s.error}>{errors.Password}</span>}
+              <p style={{ marginTop: 10, textAlign: "right" }}>
+                <Link
+                  to="/forgot-password"
+                  style={{
+                    color: "var(--brand-primary)",
+                    fontSize: "0.85rem",
+                    textDecoration: "none",
+                    fontWeight: 600,
+                  }}
+                >
+                  Forgot Password?
+                </Link>
+              </p>
             </div>
 
             <button
@@ -131,15 +145,15 @@ export default function Login() {
 
 const s = {
   leftContent: { display: "flex", flexDirection: "column", gap: 28, maxWidth: 420 },
-  logoLink:    { display: "flex", alignItems: "center", gap: 10, textDecoration: "none" },
-  logoText:    { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.4rem", color: "white", letterSpacing: "-0.02em" },
-  leftTitle:   { fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: 800, color: "white", lineHeight: 1.1, letterSpacing: "-0.03em" },
-  leftSub:     { fontSize: "0.95rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.65 },
-  trustChip:   { fontSize: "0.82rem", color: "rgba(255,255,255,0.75)", fontWeight: 500 },
-  formTitle:   { fontFamily: "var(--font-display)", fontSize: "clamp(1.6rem, 4vw, 2rem)", fontWeight: 800, marginBottom: 6, letterSpacing: "-0.02em" },
-  formSub:     { color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: 28 },
-  eyeBtn:      { position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "1rem", padding: 4, lineHeight: 1, boxShadow: "none" },
-  error:       { fontSize: "0.8rem", color: "#E53E3E", fontWeight: 500 },
-  switchText:  { marginTop: 24, textAlign: "center", fontSize: "0.9rem", color: "var(--text-muted)" },
-  switchLink:  { color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" },
+  logoLink: { display: "flex", alignItems: "center", gap: 10, textDecoration: "none" },
+  logoText: { fontFamily: "var(--font-display)", fontWeight: 800, fontSize: "1.4rem", color: "white", letterSpacing: "-0.02em" },
+  leftTitle: { fontFamily: "var(--font-display)", fontSize: "clamp(2rem, 3.5vw, 2.8rem)", fontWeight: 800, color: "white", lineHeight: 1.1, letterSpacing: "-0.03em" },
+  leftSub: { fontSize: "0.95rem", color: "rgba(255,255,255,0.6)", lineHeight: 1.65 },
+  trustChip: { fontSize: "0.82rem", color: "rgba(255,255,255,0.75)", fontWeight: 500 },
+  formTitle: { fontFamily: "var(--font-display)", fontSize: "clamp(1.6rem, 4vw, 2rem)", fontWeight: 800, marginBottom: 6, letterSpacing: "-0.02em" },
+  formSub: { color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: 28 },
+  eyeBtn: { position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: "1rem", padding: 4, lineHeight: 1, boxShadow: "none" },
+  error: { fontSize: "0.8rem", color: "#E53E3E", fontWeight: 500 },
+  switchText: { marginTop: 24, textAlign: "center", fontSize: "0.9rem", color: "var(--text-muted)" },
+  switchLink: { color: "var(--brand-primary)", fontWeight: 700, textDecoration: "none" },
 };

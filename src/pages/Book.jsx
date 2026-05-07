@@ -14,19 +14,6 @@ export default function Book() {
   const { toast, show, hide } = useToast();
   const { service: selectedService, professional } = location.state || {};
 
-  // const [professionals, setProfessionals] = useState([]);
-  // useEffect(() => {
-  //   async function fetchPros() {
-  //     try {
-  //       const res = await getProfessionals();
-  //       setProfessionals(res.data.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   }
-  //   fetchPros();
-  // }, []);
-
   useEffect(() => {
     if (!selectedService) {
       navigate("/services");
@@ -35,10 +22,6 @@ export default function Book() {
   if (!selectedService) {
     return null;
   }
-  // const professional = selectedService
-  //   ? professionals.find(p => p.Service_Id === selectedService.Service_Id)
-  //   : null;
-
 
   const [bookingDate, setBookingDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -136,7 +119,7 @@ export default function Book() {
                 <div style={{ flex: 1, minWidth: 120 }}>
                   <p style={{ fontWeight: 700, fontSize: "0.93rem" }}>{currentUser?.Customer_name}</p>
                   <p style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: 1 }}>📍 {currentUser?.Address}</p>
-                  <p style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: 1 }}>📞 {currentUser?.Contact}</p>
+                  <p style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: 1 }}>📞 {currentUser?.Email}</p>
                 </div>
                 <span style={{ fontSize: "0.7rem", fontWeight: 700, padding: "3px 10px", background: "#E8F5E9", color: "#2E7D32", borderRadius: "var(--radius-full)" }}>✓ Verified</span>
               </div>
@@ -233,7 +216,7 @@ export default function Book() {
 
             <div className="card" style={{ padding: "16px 18px", background: "linear-gradient(135deg,#FFF5F0,#FFF0E8)", borderColor: "rgba(255,90,31,0.15)" }}>
               <p style={{ fontWeight: 700, fontSize: "0.85rem", color: "var(--brand-deep)", marginBottom: 4 }}>💬 Need help?</p>
-              <p style={{ fontSize: "0.78rem", color: "var(--brand-deep)", opacity: 0.8, lineHeight: 1.6 }}>Call <strong>1800-XXX-XXXX</strong> (toll-free) · Mon–Sat 9am–7pm</p>
+              <p style={{ fontSize: "0.78rem", color: "var(--brand-deep)", opacity: 0.8, lineHeight: 1.6 }}>Contact <strong>devsupport007@gmail.com</strong> Mon–Sat 9am–7pm</p>
             </div>
           </div>
 

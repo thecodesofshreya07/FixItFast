@@ -34,7 +34,11 @@ export const sendOtp = (payload) =>
 export const verifyOtp = (payload) =>
   API.post("/verify-otp", payload);
 
+export const forgotPassword = (payload) =>
+  API.post("/forgot-password", payload);
 
+export const resetPassword = (payload) =>
+  API.post("/reset-password", payload);
 // ═══════════════════════════════════════════════════════════════════════════════
 // BOOKING CANCEL
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -42,13 +46,6 @@ export const verifyOtp = (payload) =>
 export const cancelBooking = (bookingId, reason) =>
   API.patch(`/cancelBooking/${bookingId}`, { reason });
 
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// PAYMENT REFUND / CANCEL
-// ═══════════════════════════════════════════════════════════════════════════════
-
-export const refundPayment = (paymentId) =>
-  API.post(`/refundPayment/${paymentId}`);
 
 
 // ═══════════════════════════════════════════════════════════════════════════════
