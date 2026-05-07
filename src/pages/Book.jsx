@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addBooking, getProfessionals } from "../services/api";
+//import { addBooking, getProfessionals } from "../services/api";
+import { addBooking } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Toast, useToast } from "../components/Card";
 
@@ -11,31 +12,32 @@ export default function Book() {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { toast, show, hide } = useToast();
-  const [professionals, setProfessionals] = useState([]);
-  useEffect(() => {
-    async function fetchPros() {
-      try {
-        const res = await getProfessionals();
-        setProfessionals(res.data.data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
+  const { service: selectedService, professional } = location.state || {};
 
-    fetchPros();
-  }, []);
+  // const [professionals, setProfessionals] = useState([]);
+  // useEffect(() => {
+  //   async function fetchPros() {
+  //     try {
+  //       const res = await getProfessionals();
+  //       setProfessionals(res.data.data);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   }
+  //   fetchPros();
+  // }, []);
 
   useEffect(() => {
     if (!selectedService) {
       navigate("/services");
     }
-  }, [selectedService]);
-
-  
-  const selectedService = location.state;
-  const professional = selectedService
-    ? professionals.find(p => p.Professional_Id === selectedService.Professional_Id)
-    : null;
+  }, [selectedService, navigate]);
+  if (!selectedService) {
+    return null;
+  }
+  // const professional = selectedService
+  //   ? professionals.find(p => p.Service_Id === selectedService.Service_Id)
+  //   : null;
 
 
   const [bookingDate, setBookingDate] = useState("");
@@ -53,7 +55,7 @@ export default function Book() {
       await addBooking({
         Booking_Id: Math.floor(Math.random() * 9000) + 1000,
         Customer_Id: currentUser.Customer_Id,
-        Professional_Id: selectedService.Professional_Id,
+        Professional_Id: professional?.Professional_Id,
         Service_Id: selectedService.Service_Id,
         Booking_date: bookingDate,
         Booking_Status: "Pending",
@@ -161,11 +163,11 @@ export default function Book() {
                 <p style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Assigned Professional</p>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, background: "var(--bg-muted)", borderRadius: "var(--radius-md)", padding: "12px 15px", border: "1px solid var(--border)" }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#667EEA,#764BA2)", color: "white", fontWeight: 800, fontSize: "0.85rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {professional.Professional_name[0]}
+                    {professional?.Professional_name?.[0]}
                   </div>
                   <div style={{ flex: 1 }}>
                     <p style={{ fontWeight: 700, fontSize: "0.9rem" }}>{professional.Professional_name}</p>
-                    <p style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>{professional.Skill} · ⭐ {professional.Rating}</p>
+                    <p style={{ fontSize: "0.74rem", color: "var(--text-muted)" }}>{professional.Skill} · ⭐ {professional?.Rating || 4.5}</p>
                   </div>
                   <span style={{ fontSize: "0.7rem", fontWeight: 700, padding: "3px 10px", background: "rgba(102,126,234,0.12)", color: "#667EEA", borderRadius: "var(--radius-full)" }}>Expert</span>
                 </div>

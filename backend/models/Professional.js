@@ -5,7 +5,8 @@ const professionalSchema = new mongoose.Schema({
   Professional_name: String,
   Skill: String,
   Contact: String,
-  Service_Id: Number
+  Service_Id: Number,
+  Rating: Number
 });
 module.exports = mongoose.model(
   "Professional",

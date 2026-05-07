@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getServices } from "../services/api";
 import { getBookings, getProfessionals } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import { StarRating } from "../components/Card";
+import { StarRating, Spinner } from "../components/Card";
 
 const PRICE_OPTIONS = [
   { label: "All Prices", value: Infinity },
@@ -15,14 +15,21 @@ const PRICE_OPTIONS = [
 export default function Services() {
   const [services, setServices] = useState([]);
   const [professionals, setProfessionals] = useState([]);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     async function fetchData() {
-      const [serviceRes, profRes] = await Promise.all([
-        getServices(),
-        getProfessionals()
-      ]);
-      setServices(serviceRes?.data?.data || []);
-      setProfessionals(profRes?.data?.data || []);
+      try {
+        const [serviceRes, profRes] = await Promise.all([
+          getServices(),
+          getProfessionals()
+        ]);
+        setServices(serviceRes?.data?.data || []);
+        setProfessionals(profRes?.data?.data || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     fetchData();
   }, []);
@@ -37,7 +44,7 @@ export default function Services() {
   );
 
   const getPro = (serviceId) =>
-  professionals.find(p => p.Service_Id === serviceId);
+    professionals.find(p => p.Service_Id === serviceId);
 
 
   return (
@@ -95,7 +102,9 @@ export default function Services() {
           Showing {filtered.length} service{filtered.length !== 1 ? "s" : ""}
         </p>
         {/* ── Grid ── */}
-        {filtered.length === 0 ? (
+        {loading ? (
+          <Spinner />
+        ) : filtered.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">🔍</div>
             <p className="empty-state-title">No services found</p>
@@ -110,8 +119,17 @@ export default function Services() {
               <ServiceCard
                 key={service.Service_Id}
                 service={service}
-                professional={getPro(service.Service_Id)} 
-                onBook={() => navigate("/book", { state: service })}
+                professional={getPro(service.Service_Id)}
+                onBook={() => {
+                  const professional = getPro(service.Service_Id);
+
+                  navigate("/book", {
+                    state: {
+                      service,
+                      professional,
+                    },
+                  });
+                }}
               />
             ))}
           </div>
@@ -154,7 +172,7 @@ function ServiceCard({ service, professional, onBook }) {
               <p style={S.proName}>{professional.Professional_name}</p>
               <p style={S.proLabel}>Assigned Professional</p>
             </div>
-            <StarRating rating={professional.Rating} />
+            <StarRating rating={professional?.Rating || 4.5} />
           </div>
         )}
 

@@ -13,7 +13,7 @@ export default function Navbar() {
     { to: "/",         label: "Home"     },
     { to: "/services", label: "Services" },
     ...(currentUser ? [
-      { to: "/book",     label: "Book"     },
+      // { to: "/book",     label: "Book"     },
       { to: "/bookings", label: "Bookings" },
       { to: "/payment",  label: "Payment"  },
     ] : []),

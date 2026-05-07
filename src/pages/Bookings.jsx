@@ -165,7 +165,7 @@ function BookingCard({ booking, customerName, professional, service }) {
           <DetailItem icon="🔧" label="Professional" value={professional?.Professional_name || "—"} />
           <DetailItem icon="📅" label="Date" value={formatDate(booking.Booking_date)} />
           <DetailItem icon="💰" label="Charge" value={service ? `₹${service.Service_charge}` : "—"} />
-          <DetailItem icon="⭐" label="Rating" value={professional ? `${professional.Rating} / 5` : "—"} />
+          <DetailItem icon="⭐" label="Rating" value={professional ? `${professional?.Rating || 4.5} / 5` : "—"} />
         </div>
 
         {/* Pay Now — only show on Pending */}
