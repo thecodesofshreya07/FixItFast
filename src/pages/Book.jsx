@@ -1,26 +1,47 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addBooking, PROFESSIONALS } from "../services/api";
+import { addBooking, getProfessionals } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Toast, useToast } from "../components/Card";
 
 const today = new Date().toISOString().split("T")[0];
 
 export default function Book() {
-  const location        = useLocation();
-  const navigate        = useNavigate();
+  const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser } = useAuth();
   const { toast, show, hide } = useToast();
+  const [professionals, setProfessionals] = useState([]);
+  useEffect(() => {
+    async function fetchPros() {
+      try {
+        const res = await getProfessionals();
+        setProfessionals(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
+    fetchPros();
+  }, []);
+
+  useEffect(() => {
+    if (!selectedService) {
+      navigate("/services");
+    }
+  }, [selectedService]);
+
+  
   const selectedService = location.state;
-  const professional    = selectedService
-    ? PROFESSIONALS.find(p => p.Professional_Id === selectedService.Professional_Id)
+  const professional = selectedService
+    ? professionals.find(p => p.Professional_Id === selectedService.Professional_Id)
     : null;
 
+
   const [bookingDate, setBookingDate] = useState("");
-  const [loading,     setLoading    ] = useState(false);
-  const [dateError,   setDateError  ] = useState("");
-  const [submitted,   setSubmitted  ] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [dateError, setDateError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,12 +51,12 @@ export default function Book() {
     setLoading(true);
     try {
       await addBooking({
-        Booking_Id:      Math.floor(Math.random() * 9000) + 1000,
-        Customer_Id:     currentUser.Customer_Id,
+        Booking_Id: Math.floor(Math.random() * 9000) + 1000,
+        Customer_Id: currentUser.Customer_Id,
         Professional_Id: selectedService.Professional_Id,
-        Service_Id:      selectedService.Service_Id,
-        Booking_date:    bookingDate,
-        Booking_Status:  "Pending",
+        Service_Id: selectedService.Service_Id,
+        Booking_date: bookingDate,
+        Booking_Status: "Pending",
       });
       setSubmitted(true);
       show("Booking confirmed! 🎉", "success");
@@ -62,7 +83,7 @@ export default function Book() {
           </p>
           <div style={{ display: "flex", gap: 10, justifyContent: "center", marginTop: 28, flexWrap: "wrap" }}>
             <button className="btn btn-primary" onClick={() => navigate("/bookings")}>View My Bookings →</button>
-            <button className="btn btn-ghost"   onClick={() => navigate("/services")}>Book Another</button>
+            <button className="btn btn-ghost" onClick={() => navigate("/services")}>Book Another</button>
           </div>
         </div>
         {toast && <Toast message={toast.message} type={toast.type} onClose={hide} />}
@@ -185,9 +206,9 @@ export default function Book() {
                   <div style={{ padding: "4px 20px 20px" }}>
                     {[
                       { label: "Professional", value: professional?.Professional_name || "—" },
-                      { label: "Customer",     value: currentUser?.Customer_name || "—" },
-                      { label: "Date",         value: bookingDate ? new Date(bookingDate).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) : "Not selected" },
-                      { label: "Status",       value: "Pending" },
+                      { label: "Customer", value: currentUser?.Customer_name || "—" },
+                      { label: "Date", value: bookingDate ? new Date(bookingDate).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "Not selected" },
+                      { label: "Status", value: "Pending" },
                     ].map(r => (
                       <div key={r.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "9px 0", borderBottom: "1px solid var(--border)" }}>
                         <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>{r.label}</span>

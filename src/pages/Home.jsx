@@ -1,27 +1,41 @@
 import { Link } from "react-router-dom";
-import { SERVICES } from "../services/api";
+import { getServices } from "../services/api";
+import { useState, useEffect } from "react";
 
 const FEATURES = [
   { icon: "✅", title: "Verified Professionals", desc: "Background-checked experts you can trust" },
-  { icon: "⏱️", title: "On-Time Guarantee",      desc: "Professionals arrive within the scheduled slot" },
-  { icon: "💰", title: "Transparent Pricing",    desc: "Fixed prices — zero surprise charges" },
-  { icon: "🛡️", title: "Service Warranty",       desc: "Free re-service if you're not satisfied" },
+  { icon: "⏱️", title: "On-Time Guarantee", desc: "Professionals arrive within the scheduled slot" },
+  { icon: "💰", title: "Transparent Pricing", desc: "Fixed prices — zero surprise charges" },
+  { icon: "🛡️", title: "Service Warranty", desc: "Free re-service if you're not satisfied" },
 ];
 
 const STATS = [
-  { value: "10+",  label: "Services"      },
-  { value: "10",   label: "Professionals" },
-  { value: "4.8★", label: "Avg Rating"    },
-  { value: "100%", label: "Satisfaction"  },
+  { value: "10+", label: "Services" },
+  { value: "10", label: "Professionals" },
+  { value: "4.8★", label: "Avg Rating" },
+  { value: "100%", label: "Satisfaction" },
 ];
 
 const STEPS = [
-  { n: "01", icon: "🔍", title: "Browse Services",  desc: "Pick from 10+ home services tailored to your needs." },
-  { n: "02", icon: "📅", title: "Book Instantly",   desc: "Choose a date and confirm your booking in seconds." },
-  { n: "03", icon: "🏠", title: "Get It Fixed",     desc: "A verified professional arrives and gets the job done." },
+  { n: "01", icon: "🔍", title: "Browse Services", desc: "Pick from 10+ home services tailored to your needs." },
+  { n: "02", icon: "📅", title: "Book Instantly", desc: "Choose a date and confirm your booking in seconds." },
+  { n: "03", icon: "🏠", title: "Get It Fixed", desc: "A verified professional arrives and gets the job done." },
 ];
 
 export default function Home() {
+  const [services, setServices] = useState([]);
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const res = await getServices();
+        setServices(res.data.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+    fetchServices();
+  }, []);
+
   return (
     <div style={{ width: "100%", overflowX: "hidden" }}>
 
@@ -79,7 +93,7 @@ export default function Home() {
           </div>
 
           <div className="grid-3" style={{ marginTop: "var(--space-md)" }}>
-            {SERVICES.slice(0, 6).map(s => (
+            {services.slice(0, 6).map(s => (
               <Link key={s.Service_Id} to="/services" style={{ textDecoration: "none" }}>
                 <div className="card" style={S.serviceCard}>
                   <span style={S.serviceIcon}>{s.icon}</span>
@@ -248,7 +262,7 @@ const S = {
     background: "var(--bg-muted)",
     borderRadius: "var(--radius-md)",
   },
-  serviceName:  { fontWeight: 600, fontSize: "var(--text-base)", color: "var(--text-primary)" },
+  serviceName: { fontWeight: 600, fontSize: "var(--text-base)", color: "var(--text-primary)" },
   servicePrice: { fontSize: "var(--text-sm)", color: "var(--text-muted)", marginTop: 2 },
   arrow: { marginLeft: "auto", color: "var(--text-muted)", fontSize: "1rem", flexShrink: 0 },
 
@@ -270,15 +284,15 @@ const S = {
     borderRadius: "var(--radius-full)",
     border: "1px solid rgba(255,90,31,0.18)",
   },
-  stepIcon:  { fontSize: "clamp(1.6rem,3vw,2.2rem)", margin: "6px 0 2px" },
+  stepIcon: { fontSize: "clamp(1.6rem,3vw,2.2rem)", margin: "6px 0 2px" },
   stepTitle: { fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "var(--text-base)", marginTop: 2 },
-  stepDesc:  { fontSize: "var(--text-sm)", color: "var(--text-secondary)", lineHeight: 1.6, marginTop: 4 },
+  stepDesc: { fontSize: "var(--text-sm)", color: "var(--text-secondary)", lineHeight: 1.6, marginTop: 4 },
 
   /* ── Features ── */
-  featureCard:  { display: "flex", alignItems: "flex-start", gap: "clamp(12px,2vw,18px)", padding: "clamp(20px,2.5vw,28px)" },
-  featureIcon:  { fontSize: "clamp(1.4rem,2.5vw,1.7rem)", flexShrink: 0 },
+  featureCard: { display: "flex", alignItems: "flex-start", gap: "clamp(12px,2vw,18px)", padding: "clamp(20px,2.5vw,28px)" },
+  featureIcon: { fontSize: "clamp(1.4rem,2.5vw,1.7rem)", flexShrink: 0 },
   featureTitle: { fontWeight: 700, fontSize: "var(--text-base)", marginBottom: 4 },
-  featureDesc:  { fontSize: "var(--text-sm)", color: "var(--text-secondary)", lineHeight: 1.55 },
+  featureDesc: { fontSize: "var(--text-sm)", color: "var(--text-secondary)", lineHeight: 1.55 },
 
   /* ── CTA Banner ── */
   ctaBanner: {

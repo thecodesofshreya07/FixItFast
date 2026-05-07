@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { addPayment, getBookings, getPayments, SERVICES, PROFESSIONALS } from "../services/api";
+import { addPayment, getBookings } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Toast, useToast } from "../components/Card";
 

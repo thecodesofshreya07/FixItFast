@@ -1,5 +1,5 @@
 // ─── src/services/api.js ─────────────────────────────────────────────────────
-// All HTTP calls to the Express backend go through this file.
+// All HTTP calls to the Express backend go through this le.
 // Base URL reads from the Vite env variable VITE_API_URL.
 // If not set, it falls back to http://localhost:5000
 
@@ -25,39 +25,41 @@ API.interceptors.response.use(
 );
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// STATIC DATA  (enrichment — not stored in DB)
+// OTP AUTH
 // ═══════════════════════════════════════════════════════════════════════════════
 
-export const PROFESSIONALS = [
-  { Professional_Id: 101, Professional_name: "Amit",   Skill: "Plumbing",               Contact: "9001122334", Rating: 4.8 },
-  { Professional_Id: 102, Professional_name: "Rahul",  Skill: "Electrical",             Contact: "9002233445", Rating: 4.7 },
-  { Professional_Id: 103, Professional_name: "Suresh", Skill: "Cleaning",               Contact: "9003344556", Rating: 4.9 },
-  { Professional_Id: 104, Professional_name: "Mahesh", Skill: "AC Repair",              Contact: "9004455667", Rating: 4.6 },
-  { Professional_Id: 105, Professional_name: "Rakesh", Skill: "Carpentry",              Contact: "9005566778", Rating: 4.8 },
-  { Professional_Id: 106, Professional_name: "Vijay",  Skill: "Painting",               Contact: "9006677889", Rating: 4.7 },
-  { Professional_Id: 107, Professional_name: "Anil",   Skill: "Pest Control",           Contact: "9007788990", Rating: 4.5 },
-  { Professional_Id: 108, Professional_name: "Kiran",  Skill: "Appliance Repair",       Contact: "9008899001", Rating: 4.8 },
-  { Professional_Id: 109, Professional_name: "Sunil",  Skill: "Water Purifier Service", Contact: "9009900112", Rating: 4.6 },
-  { Professional_Id: 110, Professional_name: "Deepak", Skill: "Home Sanitization",      Contact: "9010011223", Rating: 4.9 },
-];
+export const sendOtp = (payload) =>
+  API.post("/send-otp", payload);
 
-export const SERVICES = [
-  { Service_Id: 201, Service_type: "Plumbing",               Service_charge: 500,  icon: "🔧", Professional_Id: 101, description: "Fix leaks, clogs, pipe repairs & installations" },
-  { Service_Id: 202, Service_type: "Electrical",             Service_charge: 600,  icon: "⚡", Professional_Id: 102, description: "Wiring, switchboards, fan & fixture fitting" },
-  { Service_Id: 203, Service_type: "Cleaning",               Service_charge: 800,  icon: "🧹", Professional_Id: 103, description: "Deep home cleaning, bathroom & kitchen scrub" },
-  { Service_Id: 204, Service_type: "AC Repair",              Service_charge: 1200, icon: "❄️", Professional_Id: 104, description: "AC servicing, gas refill & cooling issues" },
-  { Service_Id: 205, Service_type: "Carpentry",              Service_charge: 700,  icon: "🪚", Professional_Id: 105, description: "Furniture repair, door hinges & custom work" },
-  { Service_Id: 206, Service_type: "Painting",               Service_charge: 1500, icon: "🎨", Professional_Id: 106, description: "Interior/exterior painting & touch-ups" },
-  { Service_Id: 207, Service_type: "Pest Control",           Service_charge: 1000, icon: "🐛", Professional_Id: 107, description: "Cockroach, termite & rodent treatment" },
-  { Service_Id: 208, Service_type: "Appliance Repair",       Service_charge: 900,  icon: "🔌", Professional_Id: 108, description: "Washing machine, refrigerator & microwave fix" },
-  { Service_Id: 209, Service_type: "Water Purifier Service", Service_charge: 650,  icon: "💧", Professional_Id: 109, description: "RO/UV purifier cleaning & filter change" },
-  { Service_Id: 210, Service_type: "Home Sanitization",      Service_charge: 1100, icon: "🧴", Professional_Id: 110, description: "Full home disinfection & sanitization spray" },
-];
+export const verifyOtp = (payload) =>
+  API.post("/verify-otp", payload);
+
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// AUTH
+// BOOKING CANCEL
 // ═══════════════════════════════════════════════════════════════════════════════
 
+export const cancelBooking = (bookingId, reason) =>
+  API.patch(`/cancelBooking/${bookingId}`, { reason });
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// PAYMENT REFUND / CANCEL
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const refundPayment = (paymentId) =>
+  API.post(`/refundPayment/${paymentId}`);
+
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// ONLINE / UPI PAYMENT (RAZORPAY)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+export const createOrder = (amount) =>
+  API.post("/create-order", { amount });
+
+export const verifyPayment = (data) =>
+  API.post("/verify-payment", data);
 /** POST /register — creates a new Customer row in the DB */
 export const register = (payload) =>
   API.post("/register", payload);
@@ -69,15 +71,41 @@ export const loginCustomer = (payload) =>
 // ═══════════════════════════════════════════════════════════════════════════════
 // SERVICES & PROFESSIONALS
 // ═══════════════════════════════════════════════════════════════════════════════
+// // ── Static fallback data (used by frontend UI) ──
+// export const professionals = [
+//   { Professional_Id: 101, Professional_name: "Amit",   Skill: "Plumbing",               Contact: "9001122334", Rating: 4.8 },
+//   { Professional_Id: 102, Professional_name: "Rahul",  Skill: "Electrical",             Contact: "9002233445", Rating: 4.7 },
+//   { Professional_Id: 103, Professional_name: "Suresh", Skill: "Cleaning",               Contact: "9003344556", Rating: 4.9 },
+//   { Professional_Id: 104, Professional_name: "Mahesh", Skill: "AC Repair",              Contact: "9004455667", Rating: 4.6 },
+//   { Professional_Id: 105, Professional_name: "Rakesh", Skill: "Carpentry",              Contact: "9005566778", Rating: 4.8 },
+//   { Professional_Id: 106, Professional_name: "Vijay",  Skill: "Painting",               Contact: "9006677889", Rating: 4.7 },
+//   { Professional_Id: 107, Professional_name: "Anil",   Skill: "Pest Control",           Contact: "9007788990", Rating: 4.5 },
+//   { Professional_Id: 108, Professional_name: "Kiran",  Skill: "Appliance Repair",       Contact: "9008899001", Rating: 4.8 },
+//   { Professional_Id: 109, Professional_name: "Sunil",  Skill: "Water Purifier Service", Contact: "9009900112", Rating: 4.6 },
+//   { Professional_Id: 110, Professional_name: "Deepak", Skill: "Home Sanitization",      Contact: "9010011223", Rating: 4.9 },
+// ];
+
+// export const services = [
+//   { Service_Id: 201, Service_type: "Plumbing",               Service_charge: 500,  icon: "🔧", Professional_Id: 101, description: "Fix leaks, clogs, pipe repairs & installations" },
+//   { Service_Id: 202, Service_type: "Electrical",             Service_charge: 600,  icon: "⚡", Professional_Id: 102, description: "Wiring, switchboards, fan & fixture fitting" },
+//   { Service_Id: 203, Service_type: "Cleaning",               Service_charge: 800,  icon: "🧹", Professional_Id: 103, description: "Deep home cleaning, bathroom & kitchen scrub" },
+//   { Service_Id: 204, Service_type: "AC Repair",              Service_charge: 1200, icon: "❄️", Professional_Id: 104, description: "AC servicing, gas refill & cooling issues" },
+//   { Service_Id: 205, Service_type: "Carpentry",              Service_charge: 700,  icon: "🪚", Professional_Id: 105, description: "Furniture repair, door hinges & custom work" },
+//   { Service_Id: 206, Service_type: "Painting",               Service_charge: 1500, icon: "🎨", Professional_Id: 106, description: "Interior/exterior painting & touch-ups" },
+//   { Service_Id: 207, Service_type: "Pest Control",           Service_charge: 1000, icon: "🐛", Professional_Id: 107, description: "Cockroach, termite & rodent treatment" },
+//   { Service_Id: 208, Service_type: "Appliance Repair",       Service_charge: 900,  icon: "🔌", Professional_Id: 108, description: "Washing machine, refrigerator & microwave fix" },
+//   { Service_Id: 209, Service_type: "Water Purifier Service", Service_charge: 650,  icon: "💧", Professional_Id: 109, description: "RO/UV purifier cleaning & filter change" },
+//   { Service_Id: 210, Service_type: "Home Sanitization",      Service_charge: 1100, icon: "🧴", Professional_Id: 110, description: "Full home disinfection & sanitization spray" },
+// ];
 
 /** GET /getServices — fetches all services from DB (enriched with icon/desc) */
 export const getServices = () =>
   API.get("/getServices");
 
 /** GET /getProfessionals — fetches all professionals from DB */
-export const getProfessionals = () =>
-  API.get("/getProfessionals");
-
+export const getProfessionals = () => {
+  return API.get("/getProfessionals");
+};
 // ═══════════════════════════════════════════════════════════════════════════════
 // BOOKINGS
 // ═══════════════════════════════════════════════════════════════════════════════

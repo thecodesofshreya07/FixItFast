@@ -1,29 +1,48 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getBookings, PROFESSIONALS, SERVICES } from "../services/api";
+import { getBookings, getProfessionals, getServices } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { Spinner } from "../components/Card";
 
 const STATUS_FILTERS = ["All", "Pending", "Completed", "Cancelled"];
 
 export default function Bookings() {
-  const { currentUser }                   = useAuth();
-  const [bookings, setBookings]           = useState([]);
-  const [loading,  setLoading ]           = useState(true);
-  const [filter,   setFilter  ]           = useState("All");
+  const { currentUser } = useAuth();
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("All");
+  const [professionals, setProfessionals] = useState([]);
+  const [services, setServices] = useState([]);
 
   useEffect(() => {
-    getBookings(currentUser?.Customer_Id)
-      .then(res => setBookings(res.data.data))
-      .finally(() => setLoading(false));
+    async function fetchData() {
+      try {
+        const bRes = await getBookings(currentUser?.Customer_Id);
+        const pRes = await getProfessionals();
+        const sRes = await getServices();
+
+        setBookings(bRes.data.data);
+        setProfessionals(pRes.data.data);
+        setServices(sRes.data.data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (currentUser) fetchData();
   }, [currentUser]);
 
   const displayed = filter === "All"
     ? bookings
     : bookings.filter(b => b.Booking_Status === filter);
 
-  const getProfessional = id => PROFESSIONALS.find(p => p.Professional_Id === id);
-  const getService      = id => SERVICES.find(s => s.Service_Id === id);
+  const getProfessional = id =>
+    professionals.find(p => p.Professional_Id === id);
+
+  const getService = id =>
+    services.find(s => s.Service_Id === id);
 
   return (
     <div>
@@ -80,7 +99,7 @@ export default function Bookings() {
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {displayed.map(booking => {
               const professional = getProfessional(booking.Professional_Id);
-              const service      = getService(booking.Service_Id);
+              const service = getService(booking.Service_Id);
               return (
                 <BookingCard
                   key={booking.Booking_Id}
@@ -100,7 +119,7 @@ export default function Bookings() {
 
 function BookingCard({ booking, customerName, professional, service }) {
   const statusConfig = {
-    Pending:   { color: "#E65100", bg: "#FFF3E0", dot: "#FF9800" },
+    Pending: { color: "#E65100", bg: "#FFF3E0", dot: "#FF9800" },
     Completed: { color: "#2E7D32", bg: "#E8F5E9", dot: "#4CAF50" },
     Cancelled: { color: "#C62828", bg: "#FEECEC", dot: "#F44336" },
   };
@@ -144,9 +163,9 @@ function BookingCard({ booking, customerName, professional, service }) {
         {/* Detail grid — CSS class handles responsive breakpoints */}
         <div className="details-grid">
           <DetailItem icon="🔧" label="Professional" value={professional?.Professional_name || "—"} />
-          <DetailItem icon="📅" label="Date"         value={formatDate(booking.Booking_date)} />
-          <DetailItem icon="💰" label="Charge"       value={service ? `₹${service.Service_charge}` : "—"} />
-          <DetailItem icon="⭐" label="Rating"       value={professional ? `${professional.Rating} / 5` : "—"} />
+          <DetailItem icon="📅" label="Date" value={formatDate(booking.Booking_date)} />
+          <DetailItem icon="💰" label="Charge" value={service ? `₹${service.Service_charge}` : "—"} />
+          <DetailItem icon="⭐" label="Rating" value={professional ? `${professional.Rating} / 5` : "—"} />
         </div>
 
         {/* Pay Now — only show on Pending */}

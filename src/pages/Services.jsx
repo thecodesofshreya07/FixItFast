@@ -1,27 +1,44 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getServices } from "../services/api";
+import { getBookings, getProfessionals } from "../services/api";
 import { useNavigate } from "react-router-dom";
-import { SERVICES, PROFESSIONALS } from "../services/api";
 import { StarRating } from "../components/Card";
 
 const PRICE_OPTIONS = [
-  { label: "All Prices",  value: Infinity },
-  { label: "Under ₹700",  value: 700      },
-  { label: "Under ₹1000", value: 1000     },
-  { label: "Under ₹1200", value: 1200     },
-  { label: "Under ₹1500", value: 1500     },
+  { label: "All Prices", value: Infinity },
+  { label: "Under ₹700", value: 700 },
+  { label: "Under ₹1000", value: 1000 },
+  { label: "Under ₹1200", value: 1200 },
+  { label: "Under ₹1500", value: 1500 },
 ];
 
 export default function Services() {
+  const [services, setServices] = useState([]);
+  const [professionals, setProfessionals] = useState([]);
+  useEffect(() => {
+    async function fetchData() {
+      const [serviceRes, profRes] = await Promise.all([
+        getServices(),
+        getProfessionals()
+      ]);
+      setServices(serviceRes?.data?.data || []);
+      setProfessionals(profRes?.data?.data || []);
+    }
+    fetchData();
+  }, []);
+
   const navigate = useNavigate();
-  const [search,   setSearch  ] = useState("");
+  const [search, setSearch] = useState("");
   const [maxPrice, setMaxPrice] = useState(Infinity);
 
-  const filtered = SERVICES.filter(s =>
+  const filtered = services.filter(s =>
     s.Service_type.toLowerCase().includes(search.toLowerCase()) &&
     s.Service_charge <= maxPrice
   );
 
-  const getPro = id => PROFESSIONALS.find(p => p.Professional_Id === id);
+  const getPro = (serviceId) =>
+  professionals.find(p => p.Service_Id === serviceId);
+
 
   return (
     <div style={{ width: "100%" }}>
@@ -32,7 +49,7 @@ export default function Services() {
           <div className="eyebrow">All Services</div>
           <h1 className="section-title">Choose Your Service</h1>
           <p style={{ color: "var(--text-secondary)", marginTop: 8, fontSize: "var(--text-sm)" }}>
-            {SERVICES.length} professional services for your home
+            {services.length} professional services for your home
           </p>
         </div>
       </div>
@@ -62,8 +79,8 @@ export default function Services() {
                 style={{
                   ...S.chip,
                   background: maxPrice === opt.value ? "var(--brand-primary)" : "var(--bg-muted)",
-                  color:      maxPrice === opt.value ? "white" : "var(--text-secondary)",
-                  border:     `1.5px solid ${maxPrice === opt.value ? "var(--brand-primary)" : "var(--border)"}`,
+                  color: maxPrice === opt.value ? "white" : "var(--text-secondary)",
+                  border: `1.5px solid ${maxPrice === opt.value ? "var(--brand-primary)" : "var(--border)"}`,
                   fontWeight: maxPrice === opt.value ? 700 : 500,
                 }}
               >
@@ -77,7 +94,6 @@ export default function Services() {
         <p style={{ fontSize: "var(--text-xs)", color: "var(--text-muted)", marginBottom: "var(--space-sm)", marginTop: 4 }}>
           Showing {filtered.length} service{filtered.length !== 1 ? "s" : ""}
         </p>
-
         {/* ── Grid ── */}
         {filtered.length === 0 ? (
           <div className="empty-state">
@@ -94,7 +110,7 @@ export default function Services() {
               <ServiceCard
                 key={service.Service_Id}
                 service={service}
-                professional={getPro(service.Professional_Id)}
+                professional={getPro(service.Service_Id)} 
                 onBook={() => navigate("/book", { state: service })}
               />
             ))}
@@ -187,12 +203,12 @@ const S = {
     background: "linear-gradient(135deg,#FFF5F0,#FFF0E8)",
     borderBottom: "1px solid rgba(255,90,31,0.1)",
   },
-  svcIcon:  { fontSize: "clamp(1.8rem,3vw,2.4rem)" },
+  svcIcon: { fontSize: "clamp(1.8rem,3vw,2.4rem)" },
   svcPrice: { fontFamily: "var(--font-display)", fontSize: "clamp(1.1rem,2vw,1.3rem)", fontWeight: 800, color: "var(--brand-primary)" },
 
   cardBody: { padding: "clamp(14px,2vw,20px)", display: "flex", flexDirection: "column", gap: "clamp(8px,1.5vw,12px)" },
-  svcName:  { fontFamily: "var(--font-display)", fontSize: "var(--text-base)", fontWeight: 700 },
-  svcDesc:  { fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.55 },
+  svcName: { fontFamily: "var(--font-display)", fontSize: "var(--text-base)", fontWeight: 700 },
+  svcDesc: { fontSize: "var(--text-xs)", color: "var(--text-muted)", lineHeight: 1.55 },
 
   proRow: {
     display: "flex", alignItems: "center", gap: 10,
@@ -206,6 +222,6 @@ const S = {
     color: "white", fontWeight: 700, fontSize: "var(--text-sm)",
     display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
   },
-  proName:  { fontWeight: 600, fontSize: "var(--text-xs)", color: "var(--text-primary)" },
+  proName: { fontWeight: 600, fontSize: "var(--text-xs)", color: "var(--text-primary)" },
   proLabel: { fontSize: "clamp(0.6rem,1.2vw,0.72rem)", color: "var(--text-muted)" },
 };
