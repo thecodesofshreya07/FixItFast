@@ -5,7 +5,8 @@ const paymentSchema = new mongoose.Schema({
   Amount: Number,
   Payment_mode: String,
   Payment_date: Date,
-  Booking_Id: Number
+  Booking_Id: Number,
+  Payment_status: { type: String, default: "Paid" }
 });
 
 module.exports = mongoose.model("Payment", paymentSchema);

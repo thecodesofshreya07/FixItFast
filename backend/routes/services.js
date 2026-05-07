@@ -63,7 +63,7 @@ const SERVICE_META = {
 router.get("/getServices", async (req, res) => {
   try {
     const services = await Service.find().sort({ Service_Id: 1 });
-    console.log(services);
+    // console.log(services);
     const enriched = services.map(s => ({
       ...s.toObject(),
       icon: SERVICE_META[s.Service_type]?.icon || "🔧",
@@ -83,7 +83,7 @@ router.get("/getServices", async (req, res) => {
 router.get("/getProfessionals", async (req, res) => {
   try {
     const professionals = await Professional.find().sort({ Professional_Id: 1 });
-    console.log("DB Professionals:", professionals);
+    // console.log("DB Professionals:", professionals);
     res.json({ data: professionals });
 
   } catch (err) {

@@ -7,6 +7,48 @@ const router = express.Router();
 
 
 // ── POST /addPayment ─────────────────────────
+// router.post("/addPayment", async (req, res) => {
+//   const { Booking_Id, Amount, Payment_mode, Payment_date } = req.body;
+
+//   if (!Booking_Id || !Amount || !Payment_mode || !Payment_date) {
+//     return res.status(400).json({ error: "Missing fields" });
+//   }
+
+//   try {
+//     const paymentId = Date.now();
+
+//     const payment = new Payment({
+//       Payment_Id: paymentId,
+//       Booking_Id,
+//       Amount,
+//       Payment_mode,
+//       Payment_date
+//     });
+
+//     await payment.save();
+
+//     // update booking status
+//     await Booking.updateOne(
+//       { Booking_Id },
+//       { Booking_Status: "Completed" }
+//     );
+
+//     res.status(201).json({
+//       data: {
+//         Payment_Id: paymentId,
+//         Booking_Id,
+//         Amount,
+//         Payment_mode,
+//         Payment_date
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     res.status(500).json({ error: "Payment failed" });
+//   }
+// });
+// ── POST /addPayment ─────────────────────────
 router.post("/addPayment", async (req, res) => {
   const { Booking_Id, Amount, Payment_mode, Payment_date } = req.body;
 
@@ -22,12 +64,12 @@ router.post("/addPayment", async (req, res) => {
       Booking_Id,
       Amount,
       Payment_mode,
-      Payment_date
+      Payment_date,
+      Payment_status: "Paid",   // 👈 ADD THIS
     });
 
     await payment.save();
 
-    // update booking status
     await Booking.updateOne(
       { Booking_Id },
       { Booking_Status: "Completed" }
@@ -39,7 +81,8 @@ router.post("/addPayment", async (req, res) => {
         Booking_Id,
         Amount,
         Payment_mode,
-        Payment_date
+        Payment_date,
+        Payment_status: "Paid",  // 👈 ADD THIS
       }
     });
 
@@ -48,7 +91,6 @@ router.post("/addPayment", async (req, res) => {
     res.status(500).json({ error: "Payment failed" });
   }
 });
-
 
 // ── GET /getPayments ─────────────────────────
 router.get("/getPayments", async (req, res) => {

@@ -121,4 +121,29 @@ router.patch("/updateBookingStatus/:id", async (req, res) => {
   }
 });
 
+// ── PATCH /cancelBooking/:id ─────────────────
+router.patch("/cancelBooking/:id", async (req, res) => {
+  const id = Number(req.params.id);
+  const { reason } = req.body;
+
+  try {
+    const updated = await Booking.updateOne(
+      { Booking_Id: id },
+      { 
+        Booking_Status: "Cancelled",
+        ...(reason && { Cancel_reason: reason })
+      }
+    );
+
+    if (updated.matchedCount === 0) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    res.json({ data: { Booking_Id: id, Booking_Status: "Cancelled" } });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to cancel booking" });
+  }
+});
 module.exports = router;
