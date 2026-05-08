@@ -1,60 +1,27 @@
-// const nodemailer = require("nodemailer");
-
-
-// const transporter = nodemailer.createTransport({
-//   service: "gmail",
-//   auth: {
-//     user: process.env.EMAIL_USER,
-//     pass: process.env.EMAIL_PASS,
-//   },
-// });
-
-// const sendOtpEmail = async (to, otp) => {
-//   await transporter.sendMail({
-//     from: process.env.EMAIL_USER,
-//     to,
-//     subject: "Your OTP Verification Code",
-//     html: `
-//       <div style="font-family:Arial;padding:20px">
-//         <h2>FixItFast OTP Verification</h2>
-//         <p>Your OTP is:</p>
-//         <h1>${otp}</h1>
-//         <p>This OTP will expire in 5 minutes.</p>
-//       </div>
-//     `,
-//   });
-// };
-
-// module.exports = sendOtpEmail;
-
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "74.125.24.108", // smtp.gmail.com IPv4
+  host: "smtp-relay.brevo.com",
   port: 587,
   secure: false,
-  requireTLS: true,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    rejectUnauthorized: false,
-    family: 4,
+    user: process.env.BREVO_USER,
+    pass: process.env.BREVO_PASS,
   },
 });
 
 const sendOtpEmail = async (to, otp) => {
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"FixItFast" <${process.env.BREVO_USER}>`,
     to,
     subject: "Your OTP Verification Code",
     html: `
       <div style="font-family:Arial;padding:20px">
         <h2>FixItFast OTP Verification</h2>
         <p>Your OTP is:</p>
-        <h1>${otp}</h1>
+        <h1 style="color:#FF5722;letter-spacing:8px">${otp}</h1>
         <p>This OTP will expire in 5 minutes.</p>
+        <p>If you did not request this, ignore this email.</p>
       </div>
     `,
   });
