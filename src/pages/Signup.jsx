@@ -73,7 +73,7 @@ export default function Signup() {
 
     // 2. Validate form fields before touching the OTP store
     const errs = validate();
-     //console.log("validation errors:", errs);
+    //console.log("validation errors:", errs);
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -85,10 +85,10 @@ export default function Signup() {
       //console.log("calling verifyOtp..."); // 👈 ADD THIS
       // 3. NOW verify OTP (store will be cleared only on success)
       await verifyOtp({ email: form.Email, otp });
-//console.log("verifyOtp success, calling register..."); // 👈 ADD THIS
+      //console.log("verifyOtp success, calling register..."); // 👈 ADD THIS
       const { confirmPassword, ...payload } = form;
       const res = await register(payload);
-//console.log("register success:", res); // 👈 ADD THIS
+      //console.log("register success:", res); // 👈 ADD THIS
       login(res.data.data);
       show({ type: "success", message: "Account created successfully!" });
       setOtp("");
@@ -181,8 +181,11 @@ export default function Signup() {
           </div>
 
           <h1 style={s.formTitle}>Create account</h1>
-          <p style={s.formSub}>Sign up to book services on FixItFast</p>
-
+          <p style={s.formSub}>
+            {step === 1
+              ? "Sign up to book services on FixItFast"
+              : <>OTP sent to <strong>{form.Email}</strong> — check inbox &amp; <span style={{ color: "#E65100", fontWeight: 700 }}>spam folder</span> if not received</>}
+          </p>
           <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {step === 1 && (
               <>

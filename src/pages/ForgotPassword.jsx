@@ -105,7 +105,7 @@ export default function ForgotPassword() {
           <p style={s.formSub}>
             {step === 1
               ? "Enter your registered email to receive an OTP"
-              : `OTP sent to ${email} — check your inbox (and spam)`}
+              : <>OTP sent to <strong>{email}</strong> — check inbox &amp; <span style={{ color: "#E65100", fontWeight: 700 }}>spam folder</span> if not received</>}
           </p>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
