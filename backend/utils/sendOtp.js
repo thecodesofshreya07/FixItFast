@@ -21,6 +21,11 @@ const sendOtpEmail = async (to, otp) => {
           <p>If you did not request this, ignore this email.</p>
         </div>
       `,
+      headers: {
+        "X-Mailer": "FixItFast Mailer",
+        "X-Priority": "1",
+      },
+      tags: ["otp", "transactional"],  // marks it as transactional, not marketing
     }),
   });
 
