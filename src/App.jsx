@@ -26,7 +26,7 @@ function AppRoutes() {
   return (
     <>
       <Navbar />
-      <div className="page-wrapper">
+      <main className="page-wrapper">
         <Routes>
           {/* Public routes */}
           <Route path="/"        element={<Home />}     />
@@ -45,7 +45,7 @@ function AppRoutes() {
             <ProtectedRoute><Payment /></ProtectedRoute>
           } />
         </Routes>
-      </div>
+      </main>
     </>
   );
 }
